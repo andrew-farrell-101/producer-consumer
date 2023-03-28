@@ -38,7 +38,7 @@ for size in bufferSizes:
     os.system('make') 
     os.system('clear')
 
-    # run the provided shell script. Need to capture the output to get 
+    # run the A3_donut_loop shell script. Need to capture the output to get 
     # deadlock statistics
     results = subprocess.run(['./A3_donut_loop.sh', f'{LOOPS}'], capture_output=True)
     match = re.findall(b'(\d+)( loops and )(\d+)( deadlocks)', results.stdout)
@@ -48,9 +48,10 @@ for size in bufferSizes:
 # convert lists to numpy array
 x = np.array(bufferSizes)
 y = np.array(failure_rate)
+# save the array data for future use
 np.save("buffSizes", x)
 np.save("failRate", y)
-# set graph params, plot, and save
+# set graph params, plot, save
 plt.ylim(0, 1.1)
 plt.xlabel("Buffer Size")
 plt.ylabel("% Deadlock")
