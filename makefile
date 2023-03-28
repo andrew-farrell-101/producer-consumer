@@ -8,4 +8,4 @@ proddonuts.o: donuts.h proddonuts.c
 utilities.o:  utilities.c
 	gcc -g -c utilities.c
 clean:
-	rm *.o proddonuts consdonuts
+	rm *.o proddonuts consdonuts c[0-9]
