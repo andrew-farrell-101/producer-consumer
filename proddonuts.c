@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
 /*  the rest of the producer code is a simple endless loop	*/
 /*  that forever flips a random number and attempts to 	*/
 /*  produce a new item into the selected ring buffer        */
-// THIS IS WHERE ALL THE IMPORTANT CODE WILL GO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 /*** producer initializes serial counters and in-pointers  ***/
 	int	in_ptr [NUMFLAVORS];
     int serial [NUMFLAVORS];
@@ -116,27 +115,19 @@ int main(int argc, char *argv[])
 		serial [i] = 1;
 	}
 	while(1){
-        // flip a random number
+        	// flip a random number
 		int flavor = nrand48(xsub1) & 3;
-        // Take producer ID and decrement available slots for flavor j
-        p(semid[PROD], flavor);
-        // update shared buffer and increment
-        shared_ring->flavor[flavor][in_ptr[flavor]] = serial[flavor];
-        serial[flavor] += 1;
-        // update in in_ptr to account for new entry. Use mod since ring buffer
-        in_ptr[flavor] = (in_ptr[flavor] + 1) % NUMSLOTS;
-        // tell the consumer another donut is ready
-        v(semid[CONSUMER], flavor);
-    }
+		// Take producer ID and decrement available slots for flavor j
+		p(semid[PROD], flavor);
+		// update shared buffer and increment
+		shared_ring->flavor[flavor][in_ptr[flavor]] = serial[flavor];
+		serial[flavor] += 1;
+		// update in in_ptr to account for new entry. Use mod since ring buffer
+		in_ptr[flavor] = (in_ptr[flavor] + 1) % NUMSLOTS;
+		// tell the consumer another donut is ready
+		v(semid[CONSUMER], flavor);
+    	}
 }
-	// 	// use the random number to select one of the ring buffers 
-	// 	this wioll involve p and v operations
-
-/*  produce forever, will block when a queue is full        */
-/*  termination will be from an external signal             */
-
-	//}
-
 
 void sig_handler(int sig)
 {
