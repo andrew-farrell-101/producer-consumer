@@ -1,6 +1,9 @@
 #include "donuts.h"
+
 #define NUMDOZEN 12
+
 int semid[3], out_ptr[NUMFLAVORS];
+
 /*  some of the consumer code                               */
 int main(int argc, char* argv[]) {
     int shmid; 
@@ -30,7 +33,7 @@ int main(int argc, char* argv[]) {
    
     struct timeval randtime;
     gettimeofday (&randtime, (struct timezone *) 0);
-    unsigned short xsub[3] = { 
+    unsigned short xsub[3] = {
         (ushort) randtime.tv_usec,
         (ushort) (randtime.tv_usec >> 16),
         (ushort) (getpid()),
@@ -50,34 +53,28 @@ int main(int argc, char* argv[]) {
         }
 
         for(int  m = 0; m < NUMDOZEN; m++ ) {
-            // CURRENT ISSUE, GETTIGN SEG FAULT AFTER 1 ITERATION
             int flavor = nrand48(xsub) & 3;
-            // Is there a donut for me to consume?
+            // is there space to consume
             p(semid[CONSUMER], flavor);
-            // Is it my turn?
+            // Is it this consumers turn
             p(semid[OUTPTR], flavor);
-
-            // fprintf(stderr, "PID %d marker 1\n", getpid());
-            // which donut do I want?
+            // syntactic sugar to select specific donut
             int donut = shared_ring->flavor[flavor][shared_ring->outptr[flavor]];
-            // consume that donut
+            // consume chosen donut
             consumed[flavor][serial[flavor]] = donut;
             // update shared memory outptr
             shared_ring->outptr[flavor] = (shared_ring->outptr[flavor] + 1) % NUMSLOTS;
-            
             // increment consumed buffer serial counter
             serial[flavor] += 1;
-            // tell the producer they can continue to product
+            // tell the producer they can continue to produce
             v(semid[PROD], flavor);
             // unlock the outptr for the chosen flavor
             v(semid[OUTPTR], flavor);
-            /*  get a donut and do a micro sleep for context switch  */ 
-            usleep(100);
-            // fprintf(stderr, "PID %d marker 3\n", getpid());
-            
-            
+            // do a microsleep so other consumers have a chance to jump in
+            usleep(100);    
         }
         
+        // code for logging the results in specified format
         printf("%-10s %d", "Process ID: ", getpid());
         struct timeval tv;
         time_t t;
@@ -107,8 +104,8 @@ int main(int argc, char* argv[]) {
             printf("\n");
         }
         printf("\n\n");
-    }  /*  end getting 10 dozen, now finish            */
+    } 
+
     fprintf(stderr, "  CONSUMER %s DONE\n", argv[1]);
     return 0;
-    /*  end consumer program                                 */
 }
